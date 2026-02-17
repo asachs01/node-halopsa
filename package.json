@@ -1,5 +1,5 @@
 {
-  "name": "@asachs01/node-halopsa",
+  "name": "@wyre-technology/node-halopsa",
   "version": "1.0.0",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -47,16 +47,16 @@
     "itsm",
     "ticketing"
   ],
-  "author": "Aaron Sachs",
+  "author": "Wyre Technology",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/asachs01/node-halopsa.git"
+    "url": "git+https://github.com/wyre-technology/node-halopsa.git"
   },
   "bugs": {
-    "url": "https://github.com/asachs01/node-halopsa/issues"
+    "url": "https://github.com/wyre-technology/node-halopsa/issues"
   },
-  "homepage": "https://github.com/asachs01/node-halopsa#readme",
+  "homepage": "https://github.com/wyre-technology/node-halopsa#readme",
   "engines": {
     "node": ">=18.0.0"
   },
