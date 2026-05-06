@@ -48,8 +48,11 @@ export class ActionsResource {
    * Get a single action by ID
    */
   async get(id: number): Promise<Action> {
-    const response = await this.httpClient.request<{ actions: Action[] }>(`/Actions/${id}`);
-    const action = response.actions[0];
+    const response = await this.httpClient.request<Action | { actions: Action[] }>(`/Actions/${id}`);
+    const action =
+      response && typeof response === 'object' && 'actions' in response && Array.isArray(response.actions)
+        ? response.actions[0]
+        : (response as Action | undefined);
     if (!action) {
       throw new Error(`Action ${id} not found`);
     }
@@ -107,6 +110,9 @@ export class ActionsResource {
         const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
         result[apiKey] = value as string | number | boolean;
       }
+    }
+    if (result.page_size !== undefined || result.page_no !== undefined) {
+      result.pageinate = true;
     }
     return result;
   }
