@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/wyre-technology/node-halopsa/compare/v1.0.1...v1.0.2) (2026-05-06)
+
+
+### Bug Fixes
+
+* **tickets:** handle bare object response and enable pagination ([#2](https://github.com/wyre-technology/node-halopsa/issues/2)) ([c822233](https://github.com/wyre-technology/node-halopsa/commit/c82223398cf3de8a848dd65a2631b9384f574cbe))
+
 ## [1.0.1](https://github.com/wyre-technology/node-halopsa/compare/v1.0.0...v1.0.1) (2026-02-18)
 
 
