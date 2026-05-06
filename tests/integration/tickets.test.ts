@@ -57,6 +57,31 @@ describe('TicketsResource', () => {
 
       await expect(client.tickets.get(999)).rejects.toThrow('Ticket 999 not found');
     });
+
+    it('should handle bare ticket object response (real HaloPSA API shape)', async () => {
+      const { server } = await import('../mocks/server.js');
+      const { http, HttpResponse } = await import('msw');
+      server.use(
+        http.get('https://testcompany.halopsa.com/api/Tickets/42', () =>
+          HttpResponse.json({
+            id: 42,
+            summary: 'Bare object',
+            details: '',
+            client_id: 1,
+            tickettype_id: 1,
+            status_id: 1,
+            priority_id: 1,
+            dateoccurred: '2026-05-01T00:00:00Z',
+            datecreated: '2026-05-01T00:00:00Z',
+          })
+        )
+      );
+
+      const client = createClient();
+      const ticket = await client.tickets.get(42);
+      expect(ticket.id).toBe(42);
+      expect(ticket.summary).toBe('Bare object');
+    });
   });
 
   describe('create', () => {

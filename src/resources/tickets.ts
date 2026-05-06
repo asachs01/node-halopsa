@@ -55,8 +55,11 @@ export class TicketsResource {
    * Get a single ticket by ID
    */
   async get(id: number): Promise<Ticket> {
-    const response = await this.httpClient.request<{ tickets: Ticket[] }>(`/Tickets/${id}`);
-    const ticket = response.tickets[0];
+    const response = await this.httpClient.request<Ticket | { tickets: Ticket[] }>(`/Tickets/${id}`);
+    const ticket =
+      response && typeof response === 'object' && 'tickets' in response && Array.isArray(response.tickets)
+        ? response.tickets[0]
+        : (response as Ticket | undefined);
     if (!ticket) {
       throw new Error(`Ticket ${id} not found`);
     }
@@ -161,6 +164,10 @@ export class TicketsResource {
         const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
         result[apiKey] = value as string | number | boolean;
       }
+    }
+    // HaloPSA ignores page_size/page_no unless `pageinate=true` (their typo) is also set.
+    if (result.page_size !== undefined || result.page_no !== undefined) {
+      result.pageinate = true;
     }
     return result;
   }

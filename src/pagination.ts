@@ -65,6 +65,7 @@ export class PaginatedIterable<T> implements AsyncIterable<T> {
           ...this.params,
           page_size: this.pageSize,
           page_no: pageNo,
+          pageinate: true,
           count: true,
         },
       });
