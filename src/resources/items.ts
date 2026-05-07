@@ -12,6 +12,7 @@ import type {
   ItemCreateData,
   ItemUpdateData,
 } from '../types/items.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Items resource operations
@@ -48,11 +49,16 @@ export class ItemsResource {
    * Get a single item by ID
    */
   async get(id: number): Promise<Item> {
-    const response = await this.httpClient.request<{ items: Item[] }>(`/Item/${id}`);
-    const item = response.items[0];
+    const response = await this.httpClient.request<Item | { items: Item[] }>(`/Item/${id}`);
+
+    const item = unwrapSingle<Item>(response, 'items');
+
     if (!item) {
+
       throw new Error(`Item ${id} not found`);
+
     }
+
     return item;
   }
 
@@ -99,15 +105,6 @@ export class ItemsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

@@ -39,6 +39,7 @@ import type {
   SoftwareLicenceCreateData,
   SoftwareLicenceUpdateData,
 } from '../types/reference.js';
+import { unwrapSingle } from './utils.js';
 
 /**
  * Convert params to request params format
@@ -66,9 +67,12 @@ export class TicketTypesResource {
   }
 
   async get(id: number): Promise<TicketType> {
-    const response = await this.httpClient.request<{ ticket_types: TicketType[] }>(`/TicketType/${id}`);
-    const ticketType = response.ticket_types[0];
+    const response = await this.httpClient.request<TicketType | { ticket_types: TicketType[] }>(`/TicketType/${id}`);
+
+    const ticketType = unwrapSingle<TicketType>(response, 'ticket_types');
+
     if (!ticketType) throw new Error(`Ticket type ${id} not found`);
+
     return ticketType;
   }
 }
@@ -84,9 +88,12 @@ export class StatusesResource {
   }
 
   async get(id: number): Promise<Status> {
-    const response = await this.httpClient.request<{ statuses: Status[] }>(`/Status/${id}`);
-    const status = response.statuses[0];
+    const response = await this.httpClient.request<Status | { statuses: Status[] }>(`/Status/${id}`);
+
+    const status = unwrapSingle<Status>(response, 'statuses');
+
     if (!status) throw new Error(`Status ${id} not found`);
+
     return status;
   }
 }
@@ -102,9 +109,12 @@ export class PrioritiesResource {
   }
 
   async get(id: number): Promise<Priority> {
-    const response = await this.httpClient.request<{ priorities: Priority[] }>(`/Priority/${id}`);
-    const priority = response.priorities[0];
+    const response = await this.httpClient.request<Priority | { priorities: Priority[] }>(`/Priority/${id}`);
+
+    const priority = unwrapSingle<Priority>(response, 'priorities');
+
     if (!priority) throw new Error(`Priority ${id} not found`);
+
     return priority;
   }
 }
@@ -120,9 +130,12 @@ export class CategoriesResource {
   }
 
   async get(id: number): Promise<Category> {
-    const response = await this.httpClient.request<{ categories: Category[] }>(`/Category/${id}`);
-    const category = response.categories[0];
+    const response = await this.httpClient.request<Category | { categories: Category[] }>(`/Category/${id}`);
+
+    const category = unwrapSingle<Category>(response, 'categories');
+
     if (!category) throw new Error(`Category ${id} not found`);
+
     return category;
   }
 }
@@ -138,9 +151,12 @@ export class SLAsResource {
   }
 
   async get(id: number): Promise<SLA> {
-    const response = await this.httpClient.request<{ slas: SLA[] }>(`/SLA/${id}`);
-    const sla = response.slas[0];
+    const response = await this.httpClient.request<SLA | { slas: SLA[] }>(`/SLA/${id}`);
+
+    const sla = unwrapSingle<SLA>(response, 'slas');
+
     if (!sla) throw new Error(`SLA ${id} not found`);
+
     return sla;
   }
 }
@@ -156,9 +172,12 @@ export class CustomFieldsResource {
   }
 
   async get(id: number): Promise<CustomFieldDefinition> {
-    const response = await this.httpClient.request<{ fields: CustomFieldDefinition[] }>(`/FieldInfo/${id}`);
-    const field = response.fields[0];
+    const response = await this.httpClient.request<CustomFieldDefinition | { fields: CustomFieldDefinition[] }>(`/FieldInfo/${id}`);
+
+    const field = unwrapSingle<CustomFieldDefinition>(response, 'fields');
+
     if (!field) throw new Error(`Custom field ${id} not found`);
+
     return field;
   }
 }
@@ -174,9 +193,12 @@ export class UserRolesResource {
   }
 
   async get(id: number): Promise<UserRole> {
-    const response = await this.httpClient.request<{ roles: UserRole[] }>(`/Role/${id}`);
-    const role = response.roles[0];
+    const response = await this.httpClient.request<UserRole | { roles: UserRole[] }>(`/Role/${id}`);
+
+    const role = unwrapSingle<UserRole>(response, 'roles');
+
     if (!role) throw new Error(`User role ${id} not found`);
+
     return role;
   }
 }
@@ -192,9 +214,12 @@ export class KnowledgeBaseResource {
   }
 
   async get(id: number): Promise<KBArticle> {
-    const response = await this.httpClient.request<{ articles: KBArticle[] }>(`/KBArticle/${id}`);
-    const article = response.articles[0];
+    const response = await this.httpClient.request<KBArticle | { articles: KBArticle[] }>(`/KBArticle/${id}`);
+
+    const article = unwrapSingle<KBArticle>(response, 'articles');
+
     if (!article) throw new Error(`KB article ${id} not found`);
+
     return article;
   }
 
@@ -234,9 +259,12 @@ export class RecurringInvoicesResource {
   }
 
   async get(id: number): Promise<RecurringInvoice> {
-    const response = await this.httpClient.request<{ recurring_invoices: RecurringInvoice[] }>(`/RecurringInvoice/${id}`);
-    const invoice = response.recurring_invoices[0];
+    const response = await this.httpClient.request<RecurringInvoice | { recurring_invoices: RecurringInvoice[] }>(`/RecurringInvoice/${id}`);
+
+    const invoice = unwrapSingle<RecurringInvoice>(response, 'recurring_invoices');
+
     if (!invoice) throw new Error(`Recurring invoice ${id} not found`);
+
     return invoice;
   }
 
@@ -276,9 +304,12 @@ export class ReportsResource {
   }
 
   async get(id: number): Promise<Report> {
-    const response = await this.httpClient.request<{ reports: Report[] }>(`/Report/${id}`);
-    const report = response.reports[0];
+    const response = await this.httpClient.request<Report | { reports: Report[] }>(`/Report/${id}`);
+
+    const report = unwrapSingle<Report>(response, 'reports');
+
     if (!report) throw new Error(`Report ${id} not found`);
+
     return report;
   }
 
@@ -301,9 +332,12 @@ export class SoftwareLicencesResource {
   }
 
   async get(id: number): Promise<SoftwareLicence> {
-    const response = await this.httpClient.request<{ software_licences: SoftwareLicence[] }>(`/SoftwareLicence/${id}`);
-    const licence = response.software_licences[0];
+    const response = await this.httpClient.request<SoftwareLicence | { software_licences: SoftwareLicence[] }>(`/SoftwareLicence/${id}`);
+
+    const licence = unwrapSingle<SoftwareLicence>(response, 'software_licences');
+
     if (!licence) throw new Error(`Software licence ${id} not found`);
+
     return licence;
   }
 

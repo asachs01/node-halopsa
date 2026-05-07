@@ -13,6 +13,7 @@ import type {
   QuoteUpdateData,
   QuoteConvertResponse,
 } from '../types/quotes.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Quotes resource operations
@@ -49,11 +50,16 @@ export class QuotesResource {
    * Get a single quote by ID
    */
   async get(id: number): Promise<Quote> {
-    const response = await this.httpClient.request<{ quotations: Quote[] }>(`/Quotation/${id}`);
-    const quote = response.quotations[0];
+    const response = await this.httpClient.request<Quote | { quotations: Quote[] }>(`/Quotation/${id}`);
+
+    const quote = unwrapSingle<Quote>(response, 'quotations');
+
     if (!quote) {
+
       throw new Error(`Quote ${id} not found`);
+
     }
+
     return quote;
   }
 
@@ -118,15 +124,6 @@ export class QuotesResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

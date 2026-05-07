@@ -12,6 +12,7 @@ import type {
   OpportunityCreateData,
   OpportunityUpdateData,
 } from '../types/opportunities.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Opportunities resource operations
@@ -48,11 +49,16 @@ export class OpportunitiesResource {
    * Get a single opportunity by ID
    */
   async get(id: number): Promise<Opportunity> {
-    const response = await this.httpClient.request<{ opportunities: Opportunity[] }>(`/Opportunities/${id}`);
-    const opportunity = response.opportunities[0];
+    const response = await this.httpClient.request<Opportunity | { opportunities: Opportunity[] }>(`/Opportunities/${id}`);
+
+    const opportunity = unwrapSingle<Opportunity>(response, 'opportunities');
+
     if (!opportunity) {
+
       throw new Error(`Opportunity ${id} not found`);
+
     }
+
     return opportunity;
   }
 
@@ -99,15 +105,6 @@ export class OpportunitiesResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

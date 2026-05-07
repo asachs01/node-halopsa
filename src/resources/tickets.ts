@@ -19,6 +19,7 @@ import type {
   AttachmentListResponse,
   AttachmentCreateData,
 } from '../types/tickets.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Tickets resource operations
@@ -56,10 +57,7 @@ export class TicketsResource {
    */
   async get(id: number): Promise<Ticket> {
     const response = await this.httpClient.request<Ticket | { tickets: Ticket[] }>(`/Tickets/${id}`);
-    const ticket =
-      response && typeof response === 'object' && 'tickets' in response && Array.isArray(response.tickets)
-        ? response.tickets[0]
-        : (response as Ticket | undefined);
+    const ticket = unwrapSingle<Ticket>(response, 'tickets');
     if (!ticket) {
       throw new Error(`Ticket ${id} not found`);
     }
@@ -155,20 +153,6 @@ export class TicketsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        // Convert camelCase to snake_case for API
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    // HaloPSA ignores page_size/page_no unless `pageinate=true` (their typo) is also set.
-    if (result.page_size !== undefined || result.page_no !== undefined) {
-      result.pageinate = true;
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

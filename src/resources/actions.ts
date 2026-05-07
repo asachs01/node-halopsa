@@ -12,6 +12,7 @@ import type {
   ActionCreateData,
   ActionUpdateData,
 } from '../types/actions.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Actions resource operations
@@ -49,10 +50,7 @@ export class ActionsResource {
    */
   async get(id: number): Promise<Action> {
     const response = await this.httpClient.request<Action | { actions: Action[] }>(`/Actions/${id}`);
-    const action =
-      response && typeof response === 'object' && 'actions' in response && Array.isArray(response.actions)
-        ? response.actions[0]
-        : (response as Action | undefined);
+    const action = unwrapSingle<Action>(response, 'actions');
     if (!action) {
       throw new Error(`Action ${id} not found`);
     }
@@ -102,18 +100,6 @@ export class ActionsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    if (result.page_size !== undefined || result.page_no !== undefined) {
-      result.pageinate = true;
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

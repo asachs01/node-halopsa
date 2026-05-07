@@ -12,6 +12,7 @@ import type {
   TeamCreateData,
   TeamUpdateData,
 } from '../types/teams.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Teams resource operations
@@ -48,11 +49,16 @@ export class TeamsResource {
    * Get a single team by ID
    */
   async get(id: number): Promise<Team> {
-    const response = await this.httpClient.request<{ teams: Team[] }>(`/Team/${id}`);
-    const team = response.teams[0];
+    const response = await this.httpClient.request<Team | { teams: Team[] }>(`/Team/${id}`);
+
+    const team = unwrapSingle<Team>(response, 'teams');
+
     if (!team) {
+
       throw new Error(`Team ${id} not found`);
+
     }
+
     return team;
   }
 
@@ -99,15 +105,6 @@ export class TeamsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

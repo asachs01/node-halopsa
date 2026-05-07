@@ -12,6 +12,7 @@ import type {
   SupplierCreateData,
   SupplierUpdateData,
 } from '../types/suppliers.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Suppliers resource operations
@@ -48,11 +49,16 @@ export class SuppliersResource {
    * Get a single supplier by ID
    */
   async get(id: number): Promise<Supplier> {
-    const response = await this.httpClient.request<{ suppliers: Supplier[] }>(`/Supplier/${id}`);
-    const supplier = response.suppliers[0];
+    const response = await this.httpClient.request<Supplier | { suppliers: Supplier[] }>(`/Supplier/${id}`);
+
+    const supplier = unwrapSingle<Supplier>(response, 'suppliers');
+
     if (!supplier) {
+
       throw new Error(`Supplier ${id} not found`);
+
     }
+
     return supplier;
   }
 
@@ -99,15 +105,6 @@ export class SuppliersResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

@@ -14,6 +14,7 @@ import type {
   ProjectCreateData,
   ProjectUpdateData,
 } from '../types/projects.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Projects resource operations
@@ -50,11 +51,16 @@ export class ProjectsResource {
    * Get a single project by ID
    */
   async get(id: number): Promise<Project> {
-    const response = await this.httpClient.request<{ projects: Project[] }>(`/Projects/${id}`);
-    const project = response.projects[0];
+    const response = await this.httpClient.request<Project | { projects: Project[] }>(`/Projects/${id}`);
+
+    const project = unwrapSingle<Project>(response, 'projects');
+
     if (!project) {
+
       throw new Error(`Project ${id} not found`);
+
     }
+
     return project;
   }
 
@@ -110,15 +116,6 @@ export class ProjectsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

@@ -12,6 +12,7 @@ import type {
   InvoiceCreateData,
   InvoiceUpdateData,
 } from '../types/invoices.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Invoices resource operations
@@ -48,11 +49,16 @@ export class InvoicesResource {
    * Get a single invoice by ID
    */
   async get(id: number): Promise<Invoice> {
-    const response = await this.httpClient.request<{ invoices: Invoice[] }>(`/Invoice/${id}`);
-    const invoice = response.invoices[0];
+    const response = await this.httpClient.request<Invoice | { invoices: Invoice[] }>(`/Invoice/${id}`);
+
+    const invoice = unwrapSingle<Invoice>(response, 'invoices');
+
     if (!invoice) {
+
       throw new Error(`Invoice ${id} not found`);
+
     }
+
     return invoice;
   }
 
@@ -108,15 +114,6 @@ export class InvoicesResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

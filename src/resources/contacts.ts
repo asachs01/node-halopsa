@@ -12,6 +12,7 @@ import type {
   ContactCreateData,
   ContactUpdateData,
 } from '../types/contacts.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Contacts resource operations
@@ -48,11 +49,16 @@ export class ContactsResource {
    * Get a single contact by ID
    */
   async get(id: number): Promise<Contact> {
-    const response = await this.httpClient.request<{ users: Contact[] }>(`/Users/${id}`);
-    const contact = response.users[0];
+    const response = await this.httpClient.request<Contact | { users: Contact[] }>(`/Users/${id}`);
+
+    const contact = unwrapSingle<Contact>(response, 'users');
+
     if (!contact) {
+
       throw new Error(`Contact ${id} not found`);
+
     }
+
     return contact;
   }
 
@@ -99,15 +105,6 @@ export class ContactsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

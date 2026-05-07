@@ -12,6 +12,7 @@ import type {
   AppointmentCreateData,
   AppointmentUpdateData,
 } from '../types/appointments.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Appointments resource operations
@@ -48,11 +49,16 @@ export class AppointmentsResource {
    * Get a single appointment by ID
    */
   async get(id: number): Promise<Appointment> {
-    const response = await this.httpClient.request<{ appointments: Appointment[] }>(`/Appointment/${id}`);
-    const appointment = response.appointments[0];
+    const response = await this.httpClient.request<Appointment | { appointments: Appointment[] }>(`/Appointment/${id}`);
+
+    const appointment = unwrapSingle<Appointment>(response, 'appointments');
+
     if (!appointment) {
+
       throw new Error(`Appointment ${id} not found`);
+
     }
+
     return appointment;
   }
 
@@ -99,15 +105,6 @@ export class AppointmentsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

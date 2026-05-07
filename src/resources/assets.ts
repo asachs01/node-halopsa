@@ -15,6 +15,7 @@ import type {
   AssetUpdateData,
 } from '../types/assets.js';
 import type { BaseListParams } from '../types/common.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Assets resource operations
@@ -51,11 +52,16 @@ export class AssetsResource {
    * Get a single asset by ID
    */
   async get(id: number): Promise<Asset> {
-    const response = await this.httpClient.request<{ assets: Asset[] }>(`/Asset/${id}`);
-    const asset = response.assets[0];
+    const response = await this.httpClient.request<Asset | { assets: Asset[] }>(`/Asset/${id}`);
+
+    const asset = unwrapSingle<Asset>(response, 'assets');
+
     if (!asset) {
+
       throw new Error(`Asset ${id} not found`);
+
     }
+
     return asset;
   }
 
@@ -102,16 +108,7 @@ export class AssetsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }
 
@@ -138,11 +135,16 @@ export class AssetTypesResource {
    * Get a single asset type by ID
    */
   async get(id: number): Promise<AssetType> {
-    const response = await this.httpClient.request<{ asset_types: AssetType[] }>(`/AssetType/${id}`);
-    const assetType = response.asset_types[0];
+    const response = await this.httpClient.request<AssetType | { asset_types: AssetType[] }>(`/AssetType/${id}`);
+
+    const assetType = unwrapSingle<AssetType>(response, 'asset_types');
+
     if (!assetType) {
+
       throw new Error(`Asset type ${id} not found`);
+
     }
+
     return assetType;
   }
 
