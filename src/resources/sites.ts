@@ -12,6 +12,7 @@ import type {
   SiteCreateData,
   SiteUpdateData,
 } from '../types/sites.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Sites resource operations
@@ -48,11 +49,16 @@ export class SitesResource {
    * Get a single site by ID
    */
   async get(id: number): Promise<Site> {
-    const response = await this.httpClient.request<{ sites: Site[] }>(`/Site/${id}`);
-    const site = response.sites[0];
+    const response = await this.httpClient.request<Site | { sites: Site[] }>(`/Site/${id}`);
+
+    const site = unwrapSingle<Site>(response, 'sites');
+
     if (!site) {
+
       throw new Error(`Site ${id} not found`);
+
     }
+
     return site;
   }
 
@@ -99,15 +105,6 @@ export class SitesResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

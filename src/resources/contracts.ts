@@ -12,6 +12,7 @@ import type {
   ContractCreateData,
   ContractUpdateData,
 } from '../types/contracts.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Contracts resource operations
@@ -48,11 +49,16 @@ export class ContractsResource {
    * Get a single contract by ID
    */
   async get(id: number): Promise<Contract> {
-    const response = await this.httpClient.request<{ contracts: Contract[] }>(`/ClientContract/${id}`);
-    const contract = response.contracts[0];
+    const response = await this.httpClient.request<Contract | { contracts: Contract[] }>(`/ClientContract/${id}`);
+
+    const contract = unwrapSingle<Contract>(response, 'contracts');
+
     if (!contract) {
+
       throw new Error(`Contract ${id} not found`);
+
     }
+
     return contract;
   }
 
@@ -99,15 +105,6 @@ export class ContractsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

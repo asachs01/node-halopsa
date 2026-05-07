@@ -12,6 +12,7 @@ import type {
   ClientCreateData,
   ClientUpdateData,
 } from '../types/clients.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Clients resource operations
@@ -48,11 +49,16 @@ export class ClientsResource {
    * Get a single client by ID
    */
   async get(id: number): Promise<Client> {
-    const response = await this.httpClient.request<{ clients: Client[] }>(`/Client/${id}`);
-    const client = response.clients[0];
+    const response = await this.httpClient.request<Client | { clients: Client[] }>(`/Client/${id}`);
+
+    const client = unwrapSingle<Client>(response, 'clients');
+
     if (!client) {
+
       throw new Error(`Client ${id} not found`);
+
     }
+
     return client;
   }
 
@@ -99,15 +105,6 @@ export class ClientsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }

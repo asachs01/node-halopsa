@@ -12,6 +12,7 @@ import type {
   AgentCreateData,
   AgentUpdateData,
 } from '../types/agents.js';
+import { unwrapSingle, buildListParams as sharedBuildListParams } from './utils.js';
 
 /**
  * Agents resource operations
@@ -48,11 +49,16 @@ export class AgentsResource {
    * Get a single agent by ID
    */
   async get(id: number): Promise<Agent> {
-    const response = await this.httpClient.request<{ agents: Agent[] }>(`/Agent/${id}`);
-    const agent = response.agents[0];
+    const response = await this.httpClient.request<Agent | { agents: Agent[] }>(`/Agent/${id}`);
+
+    const agent = unwrapSingle<Agent>(response, 'agents');
+
     if (!agent) {
+
       throw new Error(`Agent ${id} not found`);
+
     }
+
     return agent;
   }
 
@@ -111,15 +117,6 @@ export class AgentsResource {
    * Build query parameters from list params
    */
   private buildListParams<T extends object>(params?: T): Record<string, string | number | boolean | undefined> {
-    if (!params) return {};
-
-    const result: Record<string, string | number | boolean | undefined> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        result[apiKey] = value as string | number | boolean;
-      }
-    }
-    return result;
+    return sharedBuildListParams(params);
   }
 }
