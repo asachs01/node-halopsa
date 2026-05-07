@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/wyre-technology/node-halopsa/compare/v1.0.2...v1.0.3) (2026-05-07)
+
+
+### Bug Fixes
+
+* **resources:** apply bare-response and pageinate fixes to all resources ([#3](https://github.com/wyre-technology/node-halopsa/issues/3)) ([46af9cb](https://github.com/wyre-technology/node-halopsa/commit/46af9cb05f6b1676797ac5d371f09ec0b7571422))
+
 ## [1.0.2](https://github.com/wyre-technology/node-halopsa/compare/v1.0.1...v1.0.2) (2026-05-06)
 
 
